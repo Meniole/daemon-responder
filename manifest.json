@@ -1,5 +1,5 @@
 {
-  "name": "Auto Responder",
+  "name": "daemon-responder",
   "description": "Issue automated responses on a per-repository level.",
   "ubiquity:listeners": ["issue_comment.created"],
   "configuration": {
