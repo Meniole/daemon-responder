@@ -38,51 +38,29 @@ describe("Plugin tests", () => {
     expect(content).toEqual(manifest);
   });
 
-  it("Should handle an issue comment event", async () => {
-    const { context, infoSpy, errorSpy, debugSpy, okSpy, verboseSpy } = createContext();
-
-    expect(context.eventName).toBe("issue_comment.created");
-    expect(context.payload.comment.body).toBe("/Hello");
-
-    await runPlugin(context);
-
-    expect(errorSpy).not.toHaveBeenCalled();
-    expect(debugSpy).toHaveBeenNthCalledWith(1, STRINGS.EXECUTING_HELLO_WORLD, {
-      caller: STRINGS.CALLER_LOGS_ANON,
-      sender: STRINGS.USER_1,
-      repo: STRINGS.TEST_REPO,
-      issueNumber: 1,
-      owner: STRINGS.USER_1,
-    });
-    expect(infoSpy).toHaveBeenNthCalledWith(1, STRINGS.HELLO_WORLD);
-    expect(okSpy).toHaveBeenNthCalledWith(2, STRINGS.SUCCESSFULLY_CREATED_COMMENT);
-    expect(verboseSpy).toHaveBeenNthCalledWith(1, STRINGS.EXITING_HELLO_WORLD);
-  });
-
-  it("Should respond with `Hello, World!` in response to /Hello", async () => {
+  it("Should respond with the automated response", async () => {
     const { context } = createContext();
     await runPlugin(context);
     const comments = db.issueComments.getAll();
     expect(comments.length).toBe(2);
-    expect(comments[1].body).toMatch(STRINGS.HELLO_WORLD);
+
+    function normalize(str: string) {
+      return str.replace(/\s+/g, " ").trim();
+    }
+
+    const expected = `> [!WARNING]
+> No Reply Repo!
+<!-- UbiquityOS - handleAutoResponse - undefined - @user1 - http://localhost
+{
+\"owner\": \"ubiquity\",
+\"repo\": \"test-repo\",
+\"caller\": \"handleAutoResponse\"
+}
+-->
+`;
+    expect(normalize(comments[1].body)).toMatch(normalize(expected));
   });
 
-  it("Should respond with `Hello, Code Reviewers` in response to /Hello", async () => {
-    const { context } = createContext(STRINGS.CONFIGURABLE_RESPONSE);
-    await runPlugin(context);
-    const comments = db.issueComments.getAll();
-    expect(comments.length).toBe(2);
-    expect(comments[1].body).toMatch(STRINGS.CONFIGURABLE_RESPONSE);
-  });
-
-  it("Should not respond to a comment that doesn't contain /Hello", async () => {
-    const { context, errorSpy } = createContext(STRINGS.CONFIGURABLE_RESPONSE, STRINGS.INVALID_COMMAND);
-    await runPlugin(context);
-    const comments = db.issueComments.getAll();
-
-    expect(comments.length).toBe(1);
-    expect(errorSpy).toHaveBeenNthCalledWith(1, STRINGS.INVALID_USE_OF_SLASH_COMMAND, { caller: STRINGS.CALLER_LOGS_ANON, body: STRINGS.INVALID_COMMAND });
-  });
 });
 
 /**
@@ -153,10 +131,12 @@ function createContextInner(
     },
     logger: new Logs("debug"),
     config: {
-      configurableResponse,
+      automatedResponses: {
+        [STRINGS.TEST_REPO]: "No Reply Repo!"
+      }
     },
     env: {} as Env,
     octokit: octokit,
     commentHandler: new CommentHandler(),
-  } as unknown as Context;
+  } as Context;
 }
