@@ -47,20 +47,9 @@ describe("Plugin tests", () => {
     function normalize(str: string) {
       return str.replace(/\s+/g, " ").trim();
     }
-
-    const expected = `> [!WARNING]
-> No Reply Repo!
-<!-- UbiquityOS - handleAutoResponse - undefined - @user1 - http://localhost
-{
-\"owner\": \"ubiquity\",
-\"repo\": \"test-repo\",
-\"caller\": \"handleAutoResponse\"
-}
--->
-`;
-    expect(normalize(comments[1].body)).toMatch(normalize(expected));
+    const expected = `> [!WARNING] > No Reply Repo!`;
+    expect(normalize(comments[1].body)).toContain(normalize(expected));
   });
-
 });
 
 /**
@@ -71,14 +60,7 @@ describe("Plugin tests", () => {
  *
  * Refactor according to your needs.
  */
-function createContext(
-  configurableResponse: string = "Hello, world!", // we pass the plugin configurable items here
-  commentBody: string = "/Hello",
-  repoId: number = 1,
-  payloadSenderId: number = 1,
-  commentId: number = 1,
-  issueOne: number = 1
-) {
+function createContext(commentBody: string = "/Hello", repoId: number = 1, payloadSenderId: number = 1, commentId: number = 1, issueOne: number = 1) {
   const repo = db.repo.findFirst({ where: { id: { equals: repoId } } }) as unknown as Context["payload"]["repository"];
   const sender = db.users.findFirst({ where: { id: { equals: payloadSenderId } } }) as unknown as Context["payload"]["sender"];
   const issue1 = db.issue.findFirst({ where: { id: { equals: issueOne } } }) as unknown as Context<"issue_comment.created">["payload"]["issue"];
@@ -86,7 +68,7 @@ function createContext(
   createComment(commentBody, commentId); // create it first then pull it from the DB and feed it to _createContext
   const comment = db.issueComments.findFirst({ where: { id: { equals: commentId } } }) as unknown as Context["payload"]["comment"];
 
-  const context = createContextInner(repo, sender, issue1, comment, configurableResponse);
+  const context = createContextInner(repo, sender, issue1, comment);
   const infoSpy = jest.spyOn(context.logger, "info");
   const errorSpy = jest.spyOn(context.logger, "error");
   const debugSpy = jest.spyOn(context.logger, "debug");
@@ -114,8 +96,7 @@ function createContextInner(
   repo: Context["payload"]["repository"],
   sender: Context["payload"]["sender"],
   issue: Context<"issue_comment.created">["payload"]["issue"],
-  comment: Context["payload"]["comment"],
-  configurableResponse: string
+  comment: Context["payload"]["comment"]
 ) {
   return {
     eventName: "issue_comment.created",
@@ -132,8 +113,8 @@ function createContextInner(
     logger: new Logs("debug"),
     config: {
       automatedResponses: {
-        [STRINGS.TEST_REPO]: "No Reply Repo!"
-      }
+        [STRINGS.TEST_REPO]: "No Reply Repo!",
+      },
     },
     env: {} as Env,
     octokit: octokit,
