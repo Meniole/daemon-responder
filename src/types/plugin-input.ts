@@ -9,8 +9,12 @@ import { StaticDecode, Type as T } from "@sinclair/typebox";
  */
 export const pluginSettingsSchema = T.Object(
   {
-    configurableResponse: T.String({ default: "Hello, world!" }),
-    customStringsUrl: T.Optional(T.String()),
+    /**
+     * `repo/owner` -> `response`
+     * `repo` -> `response`
+     * `owner` -> `response`
+     */
+    automatedResponses: T.Record(T.String(), T.String()),
   },
   { default: {} }
 );
