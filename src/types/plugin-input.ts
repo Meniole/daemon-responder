@@ -14,7 +14,7 @@ export const pluginSettingsSchema = T.Object(
      * `repo`: `response`
      * `owner`: `response`
      */
-    automatedResponses: T.Record(T.String(), T.String()),
+    automatedResponses: T.Record(T.String({ default: "devpool-directory" }), T.String({ default: "This is a no-reply repository, please visit the task using the link in the description." })),
   },
   { default: {} }
 );
