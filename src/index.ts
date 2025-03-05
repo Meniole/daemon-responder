@@ -10,6 +10,4 @@ export async function runPlugin(context: Context) {
   }
 
   logger.info(`Ignoring event ${eventName}`);
-
-  return Promise.resolve();
 }

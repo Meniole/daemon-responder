@@ -119,5 +119,5 @@ function createContextInner(
     env: {} as Env,
     octokit: octokit,
     commentHandler: new CommentHandler(),
-  } as Context;
+  } as unknown as Context;
 }
