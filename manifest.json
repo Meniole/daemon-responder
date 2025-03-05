@@ -7,6 +7,9 @@
     "type": "object",
     "properties": {
       "automatedResponses": {
+        "default": {
+          "devpool-directory": "This is a no-reply repository, please visit the task using the link in the description."
+        },
         "type": "object",
         "patternProperties": {
           "^(.*)$": {
@@ -14,7 +17,6 @@
           }
         }
       }
-    },
-    "required": ["automatedResponses"]
+    }
   }
 }

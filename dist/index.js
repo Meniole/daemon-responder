@@ -31381,31 +31381,19 @@ async function returnDataToKernel(e, t, r) {
     client_payload: { state_id: t, output: r ? JSON.stringify(r) : null },
   });
 }
-async function helloWorld(e) {
+async function handleAutoResponse(e) {
   const {
     logger: t,
-    payload: r,
-    config: { configurableResponse: s, customStringsUrl: o },
-    commentHandler: A,
+    payload: { repository: r },
+    config: { automatedResponses: s },
+    commentHandler: o,
   } = e;
-  const n = r.comment.user?.login;
-  const i = r.repository.name;
-  const a = "issue" in r ? r.issue.number : r.pull_request.number;
-  const c = r.repository.owner.login;
-  const l = r.comment.body;
-  if (!RegExp(/hello/i).exec(l)) {
-    t.error(`Invalid use of slash command, use "/hello".`, { body: l });
-    return;
+  const A = r.name;
+  const n = r.owner.login;
+  const i = s[`${n}/${A}`] || s[n] || s[A];
+  if (i) {
+    await o.postComment(e, t.warn(i, { owner: n, repo: A }));
   }
-  t.info("Hello, world!");
-  t.debug(`Executing helloWorld:`, { sender: n, repo: i, issueNumber: a, owner: c });
-  await A.postComment(e, t.ok(s));
-  if (o) {
-    const r = await fetch(o).then((e) => e.json());
-    await A.postComment(e, t.ok(r.greeting));
-  }
-  t.ok(`Successfully created comment!`);
-  t.verbose(`Exiting helloWorld`);
 }
 function isCommentEvent(e) {
   return e.eventName === "issue_comment.created" || e.eventName === "pull_request_review_comment.created";
@@ -31413,13 +31401,20 @@ function isCommentEvent(e) {
 async function runPlugin(e) {
   const { logger: t, eventName: r } = e;
   if (isCommentEvent(e)) {
-    return await helloWorld(e);
+    return await handleAutoResponse(e);
   }
-  t.error(`Unsupported event: ${r}`);
+  t.info(`Ignoring event ${r}`);
 }
 var Tt = __nccwpck_require__(2874);
 const kt = rt.Object({ LOG_LEVEL: rt.Optional(rt.Enum(n, { default: n.INFO })), KERNEL_PUBLIC_KEY: rt.Optional(rt.String()) });
-const _t = rt.Object({ configurableResponse: rt.String({ default: "Hello, world!" }), customStringsUrl: rt.Optional(rt.String()) }, { default: {} });
+const _t = rt.Object(
+  {
+    automatedResponses: rt.Record(rt.String(), rt.String(), {
+      default: { "devpool-directory": "This is a no-reply repository, please visit the task using the link in the description." },
+    }),
+  },
+  { default: {} }
+);
 const Dt = createActionsPlugin((e) => runPlugin(e), {
   logLevel: process.env.LOG_LEVEL || n.INFO,
   settingsSchema: _t,
