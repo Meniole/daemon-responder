@@ -12,3 +12,4 @@ binding = "CLOUDFLARE_VERSION_METADATA"
 [observability]
 enabled = true
 
+
