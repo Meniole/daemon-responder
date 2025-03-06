@@ -1,23 +1,21 @@
 {
-  "name": "ts-template",
-  "description": "ts-template for UbiquityOS plugins.",
-  "ubiquity:listeners": ["issue_comment.created", "pull_request_review_comment.created"],
-  "commands": {
-    "hello": {
-      "ubiquity:example": "/hello argument",
-      "description": "Hello command with an argument."
-    }
-  },
+  "name": "daemon-responder",
+  "description": "Issue automated responses on a per-repository level.",
+  "ubiquity:listeners": ["issue_comment.created"],
   "configuration": {
     "default": {},
     "type": "object",
     "properties": {
-      "configurableResponse": {
-        "default": "Hello, world!",
-        "type": "string"
-      },
-      "customStringsUrl": {
-        "type": "string"
+      "automatedResponses": {
+        "default": {
+          "devpool-directory": "This is a no-reply repository, please visit the task using the link in the description."
+        },
+        "type": "object",
+        "patternProperties": {
+          "^(.*)$": {
+            "type": "string"
+          }
+        }
       }
     }
   }
