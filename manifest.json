@@ -20,5 +20,6 @@
         "type": "string"
       }
     }
-  }
+  },
+  "short_name": "Meniole/daemon-responder@development"
 }
