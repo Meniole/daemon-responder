@@ -19,5 +19,6 @@
       }
     }
   },
-  "short_name": "Meniole/daemon-responder@development"
+  "short_name": "Meniole/daemon-responder@development",
+  "homepage_url": "https://daemon-responder-development.fernand-veyrier.workers.dev"
 }
